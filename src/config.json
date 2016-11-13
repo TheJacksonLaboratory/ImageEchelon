@@ -1,0 +1,7 @@
+{
+  "port":"9766",
+  "url_base": "http://localhost:9766/",
+  "url_static":"static",
+  "url_download":"http://localhost:9766",
+  "image_path":"../data/test-set"
+}

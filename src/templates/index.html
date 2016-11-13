@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Echelon</title>
+    <link rel="shortcut icon" href="static/images/favicon.ico">
+    <link href="static/css/bootstrap.min.css" rel="stylesheet">
+
+<style type="text/css">
+body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
+
+</style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="page-header">
+          <h2>Image Echelon</h2>
+            Which image below more closely resembles the wild type?  Dendrites from
+            wild type neurons evenly cover the field, while those from mutants bundle
+            together to form braided fascicles.  Once you click "Start Comparisons",
+            select the image that is less fasciculated.
+
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h3>Image Echelon - Which image is less fasciculated?</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="panel panel-default" id="image1panel">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Image 1</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <img class="btn btn-info btn-lg img-rounded  center-block" src="static/images/wildtype.png"  alt="Image 1" width="400" height="400" id="image1">
+                        </div>
+                    </div>
+                </div>
+                <div class="row" id="wild-def">
+                    <div class="col-md-12">
+                        <label>Wild Type:</label> The dendrites evenly cover the entire field.  GFP can fill individual dendrites, but is usually found in discrete puncta along their lengths.
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default" id="image2panel">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Image 2</h3>
+                    </div>
+                    <div class="panel-body" >
+                        <div class="row">
+                            <img class="btn btn-info btn-lg img-rounded  center-block" src="static/images/mutant.png"  alt="Image 2" width="400" height="400" id="image2">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12" id="mutant-def">
+                        <label>Mutant:</label> The dendrites fasciculate, resulting in regions of dense labeling and regions of black space.  GFP is less punctate in the dendrites.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel" id="startpanel">
+                    <button class="btn btn-primary center-block" id="start">Start Comparisons</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /.container -->
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog"
+     aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-hidden="true">&times;</button>
+                <h6 id="modal-title" class="modal-title">Error</h6>
+            </div>
+            <div id="modal-message" class="modal-body">
+                There was an error ....
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- Load JS here for greater good =============================-->
+<script src="static/js/jquery-2.0.3.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
+<link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/themes/ui-lightness/jquery-ui.css"
+      rel="stylesheet" type="text/css" />
+
+<script src="static/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script src="static/js/bootstrap.min.js"></script>
+
+
+<!--script src="static/js/jquery.jsonp.js"></script-->
+
+<script>
+    var img1 = {};
+    var img2 = {};
+
+    function loadImages(data) {
+        try {
+            var pair = data.pair;
+            var imgPath = "static/images/data/";
+            var image1 = pair[0];
+            img1 = image1;
+            $("#image1").attr("src", imgPath + image1.name);
+            var image2 = pair[1];
+            img2 = image2;
+            $("#image2").attr("src", imgPath + image2.name);
+
+        } catch (err) {
+            console.debug("Error loading images!", err);
+        }
+    }
+
+    function getPair() {
+        $.ajax({
+            url: "getpair/",
+            success: function (data) {
+                loadImages(data);
+            },
+            error: function (d, msg) {
+                console.debug("'" + d.url + "'");
+                console.debug("'" + msg + "'");
+                $("#msg-modal-message").html("Error communicating with server. No images loaded.");
+                $("#myModal").modal("show");
+            },
+            complete: function (xOptions, textStatus) {
+                console.log('done');
+                //enableSearch();
+            }
+        });
+    }
+
+    function update(winner, loser) {
+        $.ajax({
+            url: "update/winner=" + winner.name + ";loser=" + loser.name,
+            success: function (data) {
+                console.log("success updating");
+                console.log(data)
+            },
+            error: function (d, msg) {
+                console.debug("'" + d.url + "'");
+                console.debug("'" + msg + "'");
+                $("#msg-modal-message").html("Error communicating with server. Status not updated.");
+                $("#myModal").modal("show");
+            },
+            complete: function (xOptions, textStatus) {
+                console.log('done');
+                //enableSearch();
+            }
+        });
+    }
+
+$().ready(function () {
+    $('#start').click(function () {
+        $("#start").css("visibility","hidden");
+        $("#wild-def").css("visibility","hidden");
+        $("#mutant-def").css("visibility","hidden");
+        getPair();
+
+        $('#image1').click(function () {
+            // send img1 back as winner
+            // send img2 back as loser
+            update(img1, img2);
+            getPair();
+            return false;
+        });
+        $('#image2').click(function () {
+            // send img1 back as winner
+            // send img2 back as loser
+            update(img2, img1);
+            getPair();
+            return false;
+        });
+        return false;
+    });
+});
+
+</script>
+
+</body>
+
+</html>
+
+
+
+
+
+
+
