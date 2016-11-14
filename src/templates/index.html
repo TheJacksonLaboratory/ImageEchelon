@@ -126,7 +126,7 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
 
     function getPair() {
         $.ajax({
-            url: "getpair/",
+            url: "/getpair/",
             success: function (data) {
                 loadImages(data);
             },
@@ -145,7 +145,7 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
 
     function update(winner, loser) {
         $.ajax({
-            url: "update/winner=" + winner.name + ";loser=" + loser.name,
+            url: "/update/winner=" + winner.name + ";loser=" + loser.name,
             success: function (data) {
                 console.log("success updating");
                 console.log(data)

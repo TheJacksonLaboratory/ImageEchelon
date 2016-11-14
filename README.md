@@ -1,6 +1,6 @@
-#H1  Image Echelon
+# Image Echelon
 
-#H2  Overview
+## Overview
 
 Image Echelon is a tool to quantify images where meaningful differences are discernible by eye, but difficult to
 quantify using traditional methods.  It was developed to quantify neuronal fasciculation in microscopy images, but can
@@ -13,33 +13,67 @@ Users are presented with a landing page containing a written description of the 
 two example images: one clear “winner” and one clear “loser”.  The software will then present two images randomly
 selected from the set, and the user is instructed to click on the “winner”.  Immediately after clicking, a new random
 pair is presented.  This continues until the user terminates the program.  After every iteration of these forced choice
-head-to-head matchups, the score for each image is updated according to an Elo algorithm.  This algorithm adds to the
-“winner” score and deducts from the “loser” score.  The score held by each image entering the matchup determines the
+head-to-head match-ups, the score for each image is updated according to an Elo algorithm.  This algorithm adds to the
+“winner” score and deducts from the “loser” score.  The score held by each image entering the match-up determines the
 amount of points gained or lost: upsets (a low score image wins over a high score image) cause a greater point exchange
-than the converse.  This results in efficient ranking of the images long before every potential head-to-head matchup
+than the converse.  This results in efficient ranking of the images long before every potential head-to-head match-up
 occurs.  At any time, the researcher can extract a report in .csv format listing each image filename, along with its
-current score and number of matchups, as well as a detailed report listing the result of every matchup.  This detailed
-report lists the filename and score of both images after the matchup with the exact time the matchup was performed.
+current score and number of match-ups, as well as a detailed report listing the result of every match-up.  This detailed
+report lists the filename and score of both images after the match-up with the exact time the match-up was performed.
 
-#H2  Installation/Setup
+## Installation/Setup
 
-To use Image Echelon, you must first setup a database.  Create a "data" folder and place the images to be compared there.
-Note: at this time the program only supports "png" format images.  You must need to
-direct Image Echelon to that folder somehow.  I get my reports from levon.jax.org/report or levon.jax.org/detail , but
-that probably won’t work for you.  You can reset the scores by running setup_image_echelon_db.py, but we probably need to
-change that name.  Okay, I don’t know how to do this.
+In order to use Image Echelon, you'll need to clone this repository to your server.  An assumption is being made that you
+are either running from a linux environment (we use CentOS) or you are running on Mac OS X. We highly recommend running Image Echelon
+from a Python virtual environment.  Image Echelon was implemented using Python 2.  Before installing any other libraries
+you should make sure you have Python 2.7.9 or better (I'm currently running Python 2.7.12).  The python package manager
+*pip* is included with this by default.  Next you'll want to install *virtualenv*.
 
-Setting up a new database
-In order to setup a new database, first you need a directory of png files where the name of each file, prior to the ".png" represents the name of the image.
+'''
+pip install virtualenv
+'''
 
-Then you run the script data/db/setup_image_echelon_db.py
+Once installed you'll want to create a specific virtual environment for Image Echelon, like:
 
-After you run the script update the src/static/images/data symbolic link to point to the new image directory you used in setup_image_echelon_db.py.
+'''
+virtualenv ImageEchelon
+'''
 
-Instructions for running this (from the script header comment) are as follows:
+This will create a new working directory named *ImageEchelon* (or whatever you chose to call the virtual environment).
+You'll then want to activate the virtual environment.
 
+'''
+. ImageEchelon/bin/activate
+'''
+
+Once your virtualenv is activated you will now use *pip* to install the required Python libraries.  In the root directory
+of the project there is a *requirements.txt* file.  To install the required packages simply run:
+
+'''
+pip install -r requirements.txt
+'''
+
+### Setting up a new database
+Image Echelon uses an SQLite database that you will want to set up next.  In order to setup a new database, first you need
+a directory of png files where the name of each file, prior to the ".png" represents the name of the image.  You will then
+generate the database using the program *setup_image_echelon_db.py*.  Usage for this program is below, and also available by typing
+'''
+    setup_image_echelon_db.py -h
+'''
+
+You will need to direct Image Echelon to the image folder you created using the -i (or --image-dir) option.
+
+Once your database has been created, you will also want to either create a symbolic link from *src/static/images/data* to
+the actual folder where the original images are housed, or copy the images to that location.  This is the where the web
+interface will find the images to pull for display.
+
+You can reset the scores in the database at anytime by re-running *setup_image_echelon_db.py*.  Note that this will
+eliminate all previous scores collected
+
+Instructions for running *setup_image_echelon_db.py* are as follows:
+'''
 usage:
-setup_image_echelon_db.py [OPTIONS] -i <image directory>
+    setup_image_echelon_db.py [OPTIONS]
 
 OPTIONS:
     -i, --image-dir the directory where images to be loaded in db reside
@@ -48,10 +82,46 @@ OPTIONS:
 Generates a database named image-echelon.db
 
 DB Columns include:
-    updated text    last date record updated
-    name text       name of file
-    location text   full path to file
-    rank real       current rating score
-    matchups int    number of matchups involving this image
+    updated     text    last date record updated
+    name        text    name of file
+    location    text    full path to file
+    rank        real    current rating score
+    matchups    int     number of match-ups involving this image
+'''
 
-The web application assumes the database to be found in and named: (from the src dir) "../data/db/image_echelon.db"
+The locations of the image directory, the database directory and the database file name, can also be controlled by providing a
+config.json file in the same directory as the program.  Example content for config.json includes:
+
+'''
+{
+  "image_path":"../data/test-set/",
+  "db_dir": "../data/db/",
+  "db_file": "image-echelon.db"
+}
+'''
+
+### Launching the web-application
+To configure your web-application you should edit the config.py file:
+'''
+DEBUG=True
+PORT=9766
+URL_BASE='http://localhost:9766'
+URL_BASE_STATIC=URL_BASE+'/static'
+URL_BASE_DOWNLOAD='http://localhost:9766'
+'''
+
+The simplest way to launch the web application is as Python Flash application.  From the src directory use the command:
+'''
+    python application.py
+'''
+
+The application could also be run out of a separate web-server, but I will not detail how to do that here.
+
+Once you have collected data, you can access your results from the following two URLs:
+'''
+http://localhost:9766/report
+http://localhost:9766/detail
+'''
+
+The first report returns a csv file containing the image file name, the rating and the number of match-ups that image was involved in.
+The second report returns the image file name, the last update date and the rating.

@@ -54,22 +54,28 @@ SOURCE_DIR = os.path.dirname(os.path.realpath(__file__))
 def main():
     with open('config.json') as json_data_file:
         config = json.load(json_data_file)
+    print(config)
     image_path = '../data/images/'
     if config.has_key('image_path'):
         image_path = config['image_path']
+    print(image_path)
     db_dir = '../data/db/'
     if config.has_key('db_dir'):
         db_dir = config['db_dir']
+    print(db_dir)
     if not os.path.isdir(db_dir):
         os.mkdir(db_dir)
+
     db_file = 'image-echelon.db'
     if config.has_key('db_file'):
         db_file = config['db_file']
+    print(db_file)
 
     if not os.path.isdir(image_path):
         print("Image directory %s cannot be found", image_path)
         sys.exit(1)
     image_dir = image_path
+    print(image_dir)
 
     conn = sqlite3.connect(os.path.join(db_dir, db_file))
 
@@ -77,6 +83,7 @@ def main():
 
     c.execute('''drop table if exists images''')
     c.execute('''drop table if exists details''')
+    print("tables dropped...")
 
     # Create tables
     c.execute('''CREATE TABLE images
@@ -84,16 +91,20 @@ def main():
                  matchups int)''')
     c.execute('''CREATE TABLE details
                  (name text, updated text, rating real)''')
+    print("tables created...")
 
     # Currently only works with PNG images.  Should add regex to pick up
     # JPG/JPEG as well.
     for file in os.listdir(image_dir):
-        if file.lower().endswith(".png"):
+        extension = os.path.splitext(file)[1][1:]
+        if extension in ["png","jpg","jpeg"]:
             now = time.strftime("%Y%m%d_%H%M%S%MS", time.localtime())
             fullpath = os.path.abspath(os.path.join(image_dir, file))
 
             c.execute("INSERT INTO images VALUES ('" + now + "', '" + file + "', '"
                       + fullpath + "', 1200.0, 0)")
+        else:
+            print("Skipping file {0} as file extension not supported.  Supported: {1}, {2}, {3}.".format(file, 'png', 'jpg', 'jpeg'))
 
     # Save (commit) the changes
     conn.commit()
