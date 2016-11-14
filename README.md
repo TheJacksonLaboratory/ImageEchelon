@@ -58,7 +58,7 @@ Image Echelon uses an SQLite database that you will want to set up next.  In ord
 a directory of png files where the name of each file, prior to the ".png" represents the name of the image.  You will then
 generate the database using the program *setup_image_echelon_db.py*.  Usage for this program is below, and also available by typing
 ```
-    setup_image_echelon_db.py -h
+python setup_image_echelon_db.py -h
 ```
 
 You will need to direct Image Echelon to the image folder you created using the -i (or --image-dir) option.
@@ -73,7 +73,7 @@ eliminate all previous scores collected
 Instructions for running *setup_image_echelon_db.py* are as follows:
 ```
 usage:
-    setup_image_echelon_db.py [OPTIONS]
+    python setup_image_echelon_db.py [OPTIONS]
 
 OPTIONS:
     -i, --image-dir the directory where images to be loaded in db reside
