@@ -29,37 +29,37 @@ from a Python virtual environment.  Image Echelon was implemented using Python 2
 you should make sure you have Python 2.7.9 or better (I'm currently running Python 2.7.12).  The python package manager
 *pip* is included with this by default.  Next you'll want to install *virtualenv*.
 
-'''
+```
 pip install virtualenv
-'''
+```
 
 Once installed you'll want to create a specific virtual environment for Image Echelon, like:
 
-'''
+```
 virtualenv ImageEchelon
-'''
+```
 
 This will create a new working directory named *ImageEchelon* (or whatever you chose to call the virtual environment).
 You'll then want to activate the virtual environment.
 
-'''
+```
 . ImageEchelon/bin/activate
-'''
+```
 
 Once your virtualenv is activated you will now use *pip* to install the required Python libraries.  In the root directory
 of the project there is a *requirements.txt* file.  To install the required packages simply run:
 
-'''
+```
 pip install -r requirements.txt
-'''
+```
 
 ### Setting up a new database
 Image Echelon uses an SQLite database that you will want to set up next.  In order to setup a new database, first you need
 a directory of png files where the name of each file, prior to the ".png" represents the name of the image.  You will then
 generate the database using the program *setup_image_echelon_db.py*.  Usage for this program is below, and also available by typing
-'''
+```
     setup_image_echelon_db.py -h
-'''
+```
 
 You will need to direct Image Echelon to the image folder you created using the -i (or --image-dir) option.
 
@@ -71,7 +71,7 @@ You can reset the scores in the database at anytime by re-running *setup_image_e
 eliminate all previous scores collected
 
 Instructions for running *setup_image_echelon_db.py* are as follows:
-'''
+```
 usage:
     setup_image_echelon_db.py [OPTIONS]
 
@@ -87,41 +87,41 @@ DB Columns include:
     location    text    full path to file
     rank        real    current rating score
     matchups    int     number of match-ups involving this image
-'''
+```
 
 The locations of the image directory, the database directory and the database file name, can also be controlled by providing a
 config.json file in the same directory as the program.  Example content for config.json includes:
 
-'''
+```
 {
   "image_path":"../data/test-set/",
   "db_dir": "../data/db/",
   "db_file": "image-echelon.db"
 }
-'''
+```
 
 ### Launching the web-application
 To configure your web-application you should edit the config.py file:
-'''
+```
 DEBUG=True
 PORT=9766
 URL_BASE='http://localhost:9766'
 URL_BASE_STATIC=URL_BASE+'/static'
 URL_BASE_DOWNLOAD='http://localhost:9766'
-'''
+```
 
 The simplest way to launch the web application is as Python Flash application.  From the src directory use the command:
-'''
+```
     python application.py
-'''
+```
 
 The application could also be run out of a separate web-server, but I will not detail how to do that here.
 
 Once you have collected data, you can access your results from the following two URLs:
-'''
+```
 http://localhost:9766/report
 http://localhost:9766/detail
-'''
+```
 
 The first report returns a csv file containing the image file name, the rating and the number of match-ups that image was involved in.
 The second report returns the image file name, the last update date and the rating.
