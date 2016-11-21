@@ -17,7 +17,7 @@ from __future__ import print_function
   along with this software.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import os
+
 from flask import Flask
 from flask import render_template
 from flask import jsonify
@@ -56,6 +56,19 @@ def index():
 def getpair():
     pair = ImageEchelon.select_matchup(CONF)
     return jsonify(pair=pair)
+
+
+@app.route("/loadtext/", methods = ['GET'])
+def load_text():
+    text_fields = {
+        "full_description": app.config['FULL_DESCRIPTION'],
+        "head_text": app.config['HEAD_TEXT'],
+        "img_1_label": app.config['IMG_1_LABEL'],
+        "img_1_text": app.config['IMG_1_TEXT'],
+        "img_2_label": app.config['IMG_2_LABEL'],
+        "img_2_text": app.config['IMG_1_TEXT'],
+    }
+    return jsonify(text_fields=text_fields)
 
 
 @app.route("/update/winner=<winner>;loser=<loser>", methods = ['GET'])

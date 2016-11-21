@@ -6,6 +6,7 @@
     <title>Image Echelon</title>
     <link rel="shortcut icon" href="static/images/favicon.ico">
     <link href="static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/css/image-echelon.css" rel="stylesheet">
 
 <style type="text/css">
 body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
@@ -16,16 +17,12 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
 
     <div class="container">
         <div class="page-header">
-          <h2>Image Echelon</h2>
-            Which image below more closely resembles the wild type?  Dendrites from
-            wild type neurons evenly cover the field, while those from mutants bundle
-            together to form braided fascicles.  Once you click "Start Comparisons",
-            select the image that is less fasciculated.
-
+          <h2>Image Ech<mark class="blue">elo</mark>n</h2>
+            <div id="full-description"></div>
         </div>
         <div class="row">
             <div class="col-md-12">
-                <h3>Image Echelon - Which image is less fasciculated?</h3>
+                <h3>Image Ech<mark class="blue">elo</mark>n - <span id="head-text"></span></h3>
             </div>
         </div>
         <div class="row">
@@ -42,7 +39,7 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
                 </div>
                 <div class="row" id="wild-def">
                     <div class="col-md-12">
-                        <label>Wild Type:</label> The dendrites evenly cover the entire field.  GFP can fill individual dendrites, but is usually found in discrete puncta along their lengths.
+                        <label id="img-1-label">Wild Type:</label> <span id="img-1-text"></span>
                     </div>
                 </div>
             </div>
@@ -59,7 +56,7 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
                 </div>
                 <div class="row">
                     <div class="col-md-12" id="mutant-def">
-                        <label>Mutant:</label> The dendrites fasciculate, resulting in regions of dense labeling and regions of black space.  GFP is less punctate in the dendrites.
+                        <label id="img-2-label"></label> <span id="img-2-text"></span>
                     </div>
                 </div>
             </div>
@@ -124,6 +121,27 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
         }
     }
 
+    function loadText() {
+        $.ajax({
+            url: "/loadtext/",
+            success: function (data) {
+                $("#full-description").text(data.text_fields.full_description);
+                $("#head-text").text(data.text_fields.head_text);
+                $("#img-1-label").text(data.text_fields.img_1_label);
+                $("#img-1-text").text(data.text_fields.img_1_text);
+                $("#img-2-label").text(data.text_fields.img_2_label);
+                $("#img-2-text").text(data.text_fields.img_2_text);
+            },
+            error: function (d, msg) {
+                console.debug("'" + d.url + "'");
+                console.debug("'" + msg + "'");
+                $("#msg-modal-message").html("Error communicating with server. No text loaded.");
+                $("#myModal").modal("show");
+            }
+        });
+    }
+
+
     function getPair() {
         $.ajax({
             url: "/getpair/",
@@ -164,6 +182,7 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
     }
 
 $().ready(function () {
+    loadText();
     $('#start').click(function () {
         $("#start").css("visibility","hidden");
         $("#wild-def").css("visibility","hidden");
