@@ -60,6 +60,7 @@ def getpair():
 
 @app.route("/loadtext/", methods = ['GET'])
 def load_text():
+    print("hi")
     text_fields = {
         "full_description": app.config['FULL_DESCRIPTION'],
         "head_text": app.config['HEAD_TEXT'],
