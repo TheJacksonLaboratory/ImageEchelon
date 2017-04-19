@@ -56,12 +56,19 @@ pip install -r requirements.txt
 ### Setting up a new database
 Image Echelon uses an SQLite database that you will want to set up next.  In order to setup a new database, first you need
 a directory of png files where the name of each file, prior to the ".png" represents the name of the image.  You will then
-generate the database using the program *setup_image_echelon_db.py*.  Usage for this program is below, and also available by typing
+need to update the src/config.json file which has the following content:
 ```
-python setup_image_echelon_db.py -h
+{
+  "image_path":"../data/test-data/",
+  "db_dir": "../data/db/",
+  "db_file": "image-echelon.db"
+}
 ```
-
-You will need to direct Image Echelon to the image folder you created using the -i (or --image-dir) option.
+You will need to changet *image_path* to contain the location of your directory of images.Once that is set you need to generate the database using the program *setup_image_echelon_db.py*.  Usage for this program is below (not it needs to be run from the *src* directory): 
+```
+cd src
+python setup_image_echelon_db.py 
+```
 
 Once your database has been created, you will also want to either create a symbolic link from *src/static/images/data* to
 the actual folder where the original images are housed, or copy the images to that location.  This is the where the web
@@ -70,18 +77,8 @@ interface will find the images to pull for display.
 You can reset the scores in the database at anytime by re-running *setup_image_echelon_db.py*.  Note that this will
 eliminate all previous scores collected
 
-Instructions for running *setup_image_echelon_db.py* are as follows:
+The data base columns created in image-echelon.db are include
 ```
-usage:
-    python setup_image_echelon_db.py [OPTIONS]
-
-OPTIONS:
-    -i, --image-dir the directory where images to be loaded in db reside
-    -h, --help      this message
-
-Generates a database named image-echelon.db
-
-DB Columns include:
     updated     text    last date record updated
     name        text    name of file
     location    text    full path to file
@@ -89,16 +86,6 @@ DB Columns include:
     matchups    int     number of match-ups involving this image
 ```
 
-The locations of the image directory, the database directory and the database file name, can also be controlled by providing a
-config.json file in the same directory as the program.  Example content for config.json includes:
-
-```
-{
-  "image_path":"../data/test-set/",
-  "db_dir": "../data/db/",
-  "db_file": "image-echelon.db"
-}
-```
 
 ### Launching the web-application
 To configure your web-application you should edit the config.py file:
