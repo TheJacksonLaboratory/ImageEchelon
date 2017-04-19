@@ -10,11 +10,14 @@ Program intended for setting up the database based on the contents of an
 image directory.
 
 usage:
-setup_image_echelon_db.py [OPTIONS] -i <image directory>
+setup_image_echelon_db.py 
 
-OPTIONS:
-    -i, --image-dir the directory where images to be loaded in db reside
-    -h, --help      this message
+Config:
+    setup_image_echelon_db.py uses a configuration file config.json which contains:
+      "image_path":"../data/test-data/",
+      "db_dir": "../data/db/",
+      "db_file": "image-echelon.db"  
+    You will want to update image_path to be the location of your image directory
 
 Generates a database named image-echelon.db
 DB Columns include:
