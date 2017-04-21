@@ -86,6 +86,22 @@ The data base columns created in image-echelon.db are include
     matchups    int     number of match-ups involving this image
 ```
 
+### Configuring page text
+The intent of ImageEchelon is to allow you to provide the service for comparing a set of images of your choosing.  With that the text on the page will need to vary based on the image set.  The default text is specific to the the fasiculation of dendrites between wild type and mutant neurons.  Obviously this doesn't meet the needs of all image sets.
+The `config.py` file contains fields that can be configured.  These fields include:
+```
+FULL_DESCRIPTION    -> This is the description under the ImageEchelon header.
+HEAD_TEXT           -> This is the question text directly about the pair of images.
+IMG_1_LABEL         -> The label below the example image on the left.
+IMG_1_TEXT          -> The description below the example image on the left.
+IMG_2_LABEL         -> The label below the example image on the right.
+IMG_2_TEXT          -> The description below the example image on the right.
+```
+
+### Replace example images
+The initial page in ImageEchelon has two example images with description that will appear below them.  You will need to provide example images to use for this page to provide the user with an example of the kind of difference they are looking for.
+These images can be found in `src/static/images`.  The one that will appear on the left is named `wildtype.png` the one that will appear on the right is named `mutant.png`. 
+
 
 ### Launching the web-application
 To configure your web-application you should edit the config.py file:
