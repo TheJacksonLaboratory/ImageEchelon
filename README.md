@@ -23,7 +23,7 @@ report lists the filename and score of both images after the match-up with the e
 
 ## In Literature
 
-In the paper Garret et al, Replacing the PDZ-interacting C-termini of DSCAM and DSCAML1 with epitope tags causes different phenotypic severity in different cell populations, [eLife](https://elifesciences.org/articles/16144) 2016;5:e16144 DOI: [10.7554/eLife.16144](https://doi.org/10.7554/eLife.16144) PMID: [27637097](https://www.ncbi.nlm.nih.gov/pubmed/27637097) PMCID: [PMC5026468](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5026468/], 
+In the paper Garret et al, Replacing the PDZ-interacting C-termini of DSCAM and DSCAML1 with epitope tags causes different phenotypic severity in different cell populations, [eLife](https://elifesciences.org/articles/16144) 2016;5:e16144 DOI: [10.7554/eLife.16144](https://doi.org/10.7554/eLife.16144) PMID: [27637097](https://www.ncbi.nlm.nih.gov/pubmed/27637097) PMCID: [PMC5026468](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5026468/), 
 ImageEchelon was the software used for the ELO scoring mentioned under the Materials and methods section.
  
 ## Installation/Setup
