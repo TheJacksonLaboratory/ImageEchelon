@@ -174,74 +174,52 @@ def update_ranking(db, winner, loser):
                       'matchups': lose_match}}
 
 
-def get_ranking_report(db):
+def get_ranking_report(db, delimiter=','):
     '''
     Generates the CSV ranking report file
-    :param config: contains the db directory/file name.
+    :param db: contains the db directory/file name.
+    :param delimiter: delimiter between fields
     :return: CSV file with the columns: image, rating, match-ups
     '''
     conn = sqlite3.connect(db)
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
     query_results = c.execute(SQL_SELECT_IMAGES_ALL_BY_RANK)
 
     csvfile = StringIO()
 
-    headers = [
-        'image',
-        'rating',
-        'match-ups'
-    ]
-    rows = []
+    writer = csv.writer(csvfile, delimiter=delimiter)
+    writer.writerow(['image', 'rating', 'match-ups'])
+
     for row in query_results:
-        rows.append(
-            {
-                'image': row[1],
-                'rating': row[3],
-                'match-ups': row[4]
-            }
-        )
-    writer = csv.DictWriter(csvfile, headers)
-    writer.writeheader()
-    for row in rows:
-        writer.writerow(
-            dict(
-                (k, v.encode('utf-8') if type(v) is unicode else v) for k, v in row.iteritems()
-            )
-        )
+        writer.writerow([row['name'], row['rank'], row['matchups']])
+
     csvfile.seek(0)
     conn.close()
 
     return csvfile
 
 
-def get_detail_report(db):
+def get_detail_report(db, delimiter=','):
     '''
     Generates the CSV detail report file
-    :param config: contains the db directory/file name.
+    :param db: contains the db directory/file name.
+    :param delimiter: delimiter between fields
     :return: CSV file with the columns: image, date, rating
     '''
     conn = sqlite3.connect(db)
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
     query_results = c.execute(SQL_SELECT_DETAILS_BY_NAME)
 
     csvfile = StringIO()
 
-    headers = ['image', 'date', 'rating']
-    rows = []
+    writer = csv.writer(csvfile, delimiter=delimiter)
+    writer.writerow(['image', 'date', 'rating'])
+
     for row in query_results:
-        rows.append({
-            'image': row[0],
-            'date': row[1],
-            'rating': row[2]
-        })
-    writer = csv.DictWriter(csvfile, headers)
-    writer.writeheader()
-    for row in rows:
-        writer.writerow(
-            dict(
-                (k, v.encode('utf-8') if type(v) is unicode else v) for k, v in row.iteritems()
-            )
-        )
+        writer.writerow([row['name'], row['updated'], row['rating']])
+
     csvfile.seek(0)
     conn.close()
 
@@ -249,8 +227,15 @@ def get_detail_report(db):
 
 
 def init(db, image_dir):
-    print(db)
-    print(image_dir)
+    '''
+    Generates the ImageEchelon database
+    :param db: contains the db directory/file name.
+    :param image_dir: directory to search for images
+    :return: CSV file with the columns: image, date, rating
+    '''
+    print('Creating database: {}'.format(db))
+    print('Looking for images in: {}'.format(image_dir))
+
     if os.path.exists(db):
         print('{} exists.  Please remove before proceeding.')
         sys.exit(1)
@@ -285,23 +270,13 @@ def init(db, image_dir):
     # Just be sure any changes have been committed or they will be lost.
     conn.close()
 
+    print('Database initialized')
+
 
 def stats(db):
-    fd = open('rankings_report.tsv', 'w')
-    dd = open('detail_results.tsv', 'w')
-    conn = sqlite3.connect(db)
-    c = conn.cursor()
-    fd.write('image\trating\tmatch-ups\n')
+    with open('rankings_report.tsv', 'w') as fd:
+        fd.write(get_detail_report(db, '\t').getvalue())
 
-    for row in c.execute(SQL_SELECT_IMAGES_ALL_BY_RANK):
-        fd.write('{0}\t{1:.1f}\t{2}\n'.format(row[1], row[3], row[4]))
-
-    dd.write('name\tupdated\trating\n')
-
-    for row in c.execute(SQL_SELECT_DETAILS_BY_NAME):
-        dd.write('{0}\t{1}\t{2:.1f}\n'.format(row[0], row[1], row[2]))
-
-    conn.close()
-    fd.close()
-    dd.close()
+    with open('detail_results.tsv', 'w') as fd:
+        fd.write(get_ranking_report(db, '\t').getvalue())
 

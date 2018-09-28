@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import os
 import click
+import six
 
 from flask import Flask
 from flask import render_template
@@ -74,6 +75,17 @@ def update(winner, loser):
 @app.route('/report/', methods=['GET'])
 def report():
     csvfile = IE.get_ranking_report(app.config['DB'])
+
+    if six.PY3:
+        # Creating the byteIO object from the StringIO Object
+        from io import BytesIO
+        mem = BytesIO()
+        mem.write(csvfile.getvalue().encode('utf-8'))
+        # seeking was necessary. Python 3.5.2, Flask 0.12.2
+        mem.seek(0)
+        csvfile.close()
+        csvfile = mem
+
     return send_file(csvfile, attachment_filename='rank_report.csv',
                      as_attachment=True)
 
@@ -82,6 +94,17 @@ def report():
 @app.route('/detail/', methods=['GET'])
 def detail():
     csvfile = IE.get_detail_report(app.config['DB'])
+
+    if six.PY3:
+        # Creating the byteIO object from the StringIO Object
+        from io import BytesIO
+        mem = BytesIO()
+        mem.write(csvfile.getvalue().encode('utf-8'))
+        # seeking was necessary. Python 3.5.2, Flask 0.12.2
+        mem.seek(0)
+        csvfile.close()
+        csvfile = mem
+
     return send_file(csvfile, attachment_filename='detail_report.csv',
                      as_attachment=True)
 
@@ -144,7 +167,7 @@ def reports():
     app.config.from_envvar('IMAGE_ECHELON_SETTINGS')
     fixpaths()
 
-    IE.stats()
+    IE.stats(app.config['DB'])
 
 
 if __name__ == "__main__":
