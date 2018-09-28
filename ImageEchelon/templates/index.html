@@ -18,11 +18,11 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
     <div class="container">
         <div class="page-header">
           <h2>Image Ech<mark class="blue">elo</mark>n</h2>
-            <div id="full-description"></div>
+            <div id="full-description">{{ config.FULL_DESCRIPTION }}</div>
         </div>
         <div class="row">
             <div class="col-md-12">
-                <h3>Image Ech<mark class="blue">elo</mark>n - <span id="head-text"></span></h3>
+                <h3>Image Ech<mark class="blue">elo</mark>n - <span id="head-text">{{ config.HEAD_TEXT }}</span></h3>
             </div>
         </div>
         <div class="row">
@@ -39,7 +39,7 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
                 </div>
                 <div class="row" id="wild-def">
                     <div class="col-md-12">
-                        <label id="img-1-label">Wild Type:</label> <span id="img-1-text"></span>
+                        <label id="img-1-label">{{ config.IMG_1_LABEL }}</label> <span id="img-1-text">{{ config.IMG_1_TEXT }}</span>
                     </div>
                 </div>
             </div>
@@ -56,7 +56,7 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
                 </div>
                 <div class="row">
                     <div class="col-md-12" id="mutant-def">
-                        <label id="img-2-label"></label> <span id="img-2-text"></span>
+                        <label id="img-2-label">{{ config.IMG_2_LABEL }}</label> <span id="img-2-text">{{ config.IMG_2_TEXT }}</span>
                     </div>
                 </div>
             </div>
@@ -102,17 +102,17 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
 <!--script src="static/js/jquery.jsonp.js"></script-->
 
 <script>
-    var img1 = {};
-    var img2 = {};
+    let img1 = {};
+    let img2 = {};
 
     function loadImages(data) {
         try {
-            var pair = data.pair;
-            var imgPath = "static/images/data/";
-            var image1 = pair[0];
+            let pair = data.pair;
+            let imgPath = "/image/";
+            let image1 = pair[0];
             img1 = image1;
             $("#image1").attr("src", imgPath + image1.name);
-            var image2 = pair[1];
+            let image2 = pair[1];
             img2 = image2;
             $("#image2").attr("src", imgPath + image2.name);
 
@@ -120,27 +120,6 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
             console.debug("Error loading images!", err);
         }
     }
-
-    function loadText() {
-        $.ajax({
-            url: "/loadtext/",
-            success: function (data) {
-                $("#full-description").text(data.text_fields.full_description);
-                $("#head-text").text(data.text_fields.head_text);
-                $("#img-1-label").text(data.text_fields.img_1_label);
-                $("#img-1-text").text(data.text_fields.img_1_text);
-                $("#img-2-label").text(data.text_fields.img_2_label);
-                $("#img-2-text").text(data.text_fields.img_2_text);
-            },
-            error: function (d, msg) {
-                console.debug("'" + d.url + "'");
-                console.debug("'" + msg + "'");
-                $("#msg-modal-message").html("Error communicating with server. No text loaded.");
-                $("#myModal").modal("show");
-            }
-        });
-    }
-
 
     function getPair() {
         $.ajax({
@@ -182,7 +161,7 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
     }
 
 $().ready(function () {
-    loadText();
+    getPair();
     $('#start').click(function () {
         $("#start").css("visibility","hidden");
         $("#wild-def").css("visibility","hidden");
@@ -212,10 +191,3 @@ $().ready(function () {
 </body>
 
 </html>
-
-
-
-
-
-
-
