@@ -167,6 +167,8 @@ IMAGE_ECHELON_SETTINGS=/etc/ImageEchelon.cfg python application.py web
 The application could also be run out of a separate web-server, but I will not 
 detail how to do that here.
 
+### Statistics and Reporting
+
 Once you have collected data, you can access your results from the following 
 two URLs:
 ```
@@ -177,3 +179,12 @@ http://localhost:9766/detail
 The first report returns a csv file containing the image file name, the rating
 and the number of match-ups that image was involved in. The second report 
 returns the image file name, the last update date and the rating.
+
+You could also run via the command line:
+
+```
+IMAGE_ECHELON_SETTINGS=/etc/ImageEchelon.cfg python application.py reports
+```
+
+Two files will be created: `rankings_report.tsv` and `detail_results.tsv`.
+
