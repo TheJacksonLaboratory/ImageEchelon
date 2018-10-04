@@ -23,7 +23,6 @@ interactions are abstracted within this module.
 
 import csv
 import os
-import random
 import sqlite3
 import sys
 import time
@@ -39,26 +38,38 @@ from elo import Rating, rate_1vs1
 
 SQL_CREATE_TABLE_IMAGES = '''
 CREATE TABLE images (
-    updated text, 
-    name text, 
-    location text, 
-    rank real,
-    matchups int
+    image_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    location TEXT NOT NULL,
+    updated TEXT NOT NULL, 
+    rating REAL NOT NULL,
+    num_wins INTEGER NOT NULL,
+    num_losses INTEGER NOT NULL,
+    PRIMARY KEY (image_id),
+    CONSTRAINT images_ix1 UNIQUE (name)
 )
 '''
 
-SQL_CREATE_TABLE_DETAILS = '''
-CREATE TABLE details(
-    name text, 
-    updated text, 
-    rating real
+SQL_CREATE_TABLE_MATCHES = '''
+CREATE TABLE matches (
+    match_id INTEGER NOT NULL,
+    winner_image_id INTEGER NOT NULL, 
+    winner_rating_before REAL NOT NULL, 
+    winner_rating_after REAL NOT NULL, 
+    loser_image_id INTEGER NOT NULL,
+    loser_rating_before REAL NOT NULL, 
+    loser_rating_after REAL NOT NULL,
+    updated TEXT NOT NULL, 
+    PRIMARY KEY (match_id),
+    FOREIGN KEY (winner_image_id) REFERENCES images(image_id),
+    FOREIGN KEY (loser_image_id) REFERENCES images(image_id)
 )
 '''
 
 SQL_INSERT_IMAGES = '''
 INSERT 
   INTO images 
-VALUES (?, ?, ?, ?, ?)
+VALUES (NULL, ?, ?, ?, ?, ?, ?)
 '''
 
 SQL_SELECT_IMAGES_ALL = '''
@@ -66,40 +77,55 @@ SELECT *
   FROM images
 '''
 
+SQL_SELECT_IMAGES_PAIR = '''
+SELECT * 
+  FROM images 
+ ORDER BY RANDOM() LIMIT 2
+'''
+
 SQL_SELECT_IMAGES_ALL_BY_RANK = '''
 SELECT * 
   FROM images 
-ORDER BY rank DESC 
+ORDER BY num_wins DESC 
 '''
 
-SQL_SELECT_IMAGES_BY_NAME = '''
-SELECT rank, matchups 
-  FROM images 
- WHERE name = ?
-'''
-
-SQL_SELECT_DETAILS_BY_NAME = '''
+SQL_SELECT_IMAGE_BY_ID = '''
 SELECT * 
-  FROM details 
-ORDER BY name, updated
+  FROM images 
+ WHERE image_id = ?
 '''
 
-SQL_UPDATE_IMAGES = '''
+SQL_SELECT_MATCHES_ALL = '''
+SELECT m.match_id, iw.name winner_name, m.winner_rating_after, il.name loser_name, m.loser_rating_after, m.updated match_time
+  FROM matches m, images iw, images il
+ WHERE m.winner_image_id = iw.image_id
+   AND m.loser_image_id = il.image_id
+ ORDER BY m.match_id
+'''
+
+SQL_UPDATE_IMAGE_WIN = '''
 UPDATE images 
-   SET updated = ?, rank = ?, matchups = ?
- WHERE name = ?
+   SET updated = ?, rating = ?, num_wins = ?
+ WHERE image_id = ?
 '''
 
-SQL_INSERT_DETAILS = '''
+SQL_UPDATE_IMAGE_LOSS = '''
+UPDATE images 
+   SET updated = ?, rating = ?, num_losses = ?
+ WHERE image_id = ?
+'''
+
+SQL_INSERT_MATCH = '''
 INSERT 
-  INTO details 
-VALUES (?, ?, ?)
+  INTO matches
+VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)
 '''
 
 
 def select_matchup(db):
     '''
     Method to select the next pair of images to be compared
+
     :param db: contains the db directory/file name.
     :return: returns a pair of image dictionaries, with the attributes:
     name, location, updated, rating and used
@@ -108,74 +134,72 @@ def select_matchup(db):
     c = conn.cursor()
     images = []
 
-    for row in c.execute(SQL_SELECT_IMAGES_ALL):
+    for row in c.execute(SQL_SELECT_IMAGES_PAIR):
         images.append({
+            'id': row[0],
             'name': row[1],
             'location': row[2],
-            'updated': row[0],
-            'rating': row[3],
-            'used': row[4]
+            'updated': row[3],
+            'rating': row[4],
+            'num_wins': row[5],
+            'num_losses': row[6]
         })
-    random.seed()
-    random.shuffle(images)
-    pair = images[:2]
 
     conn.close()
-    return pair
+    return images
 
 
 def update_ranking(db, winner, loser):
     """
     Method to update the database ranking value for both the winner and loser
     based on an ELO algorithm
+
     :param db: contains the db directory/file name.
-    :param winner: The image selected by the user
-    :param loser: The image not selected by the user
+    :param winner: The image id selected by the user
+    :param loser: The image id not selected by the user
     :return:  Returns a results map containing a "winner" and a "loser" with
     their new rankings.  Rankings include columns: name, updated, rating,
     matchups
     """
     #  Set up for sqlite db
     conn = sqlite3.connect(db)
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    c.execute(SQL_SELECT_IMAGES_BY_NAME, (winner,))
-    win_row = c.fetchone()
-    win_rank = win_row[0]
-    win_match = win_row[1] + 1
-    win_rating = Rating(win_rank)
 
-    c.execute(SQL_SELECT_IMAGES_BY_NAME, (loser,))
+    c.execute(SQL_SELECT_IMAGE_BY_ID, (winner,))
+    win_row = c.fetchone()
+    win_num_matchups = win_row['num_wins'] + 1
+    win_rating = Rating(win_row['rating'])
+
+    c.execute(SQL_SELECT_IMAGE_BY_ID, (loser,))
     lose_row = c.fetchone()
-    lose_rank = lose_row[0]
-    lose_match = lose_row[1] + 1
-    lose_rating = Rating(lose_rank)
+    lose_num_matchups = lose_row['num_losses'] + 1
+    lose_rating = Rating(lose_row['rating'])
 
     # update ratings
-    win_rating, lose_rating = rate_1vs1(win_rating, lose_rating)
+    win_rating_new, lose_rating_new = rate_1vs1(win_rating, lose_rating)
     now = time.strftime('%Y%m%d_%H%M%S%MS', time.localtime())
 
-    c.execute(SQL_UPDATE_IMAGES, (now, win_rating, win_match, winner))
-    c.execute(SQL_INSERT_DETAILS, (winner, now, win_rating))
+    c.execute(SQL_INSERT_MATCH, (winner, win_row['rating'], win_rating_new,
+                                 loser, lose_row['rating'], lose_rating_new,
+                                 now))
 
-    c.execute(SQL_UPDATE_IMAGES, (now, lose_rating, lose_match, loser))
-    c.execute(SQL_INSERT_DETAILS, (loser, now, lose_rating))
+    c.execute(SQL_UPDATE_IMAGE_WIN, (now, win_rating_new, win_num_matchups, winner))
+    c.execute(SQL_UPDATE_IMAGE_LOSS, (now, lose_rating_new, lose_num_matchups, loser))
 
     conn.commit()
     conn.close()
 
-    return {'winner': {'name': winner,
-                       'updated': now,
-                       'rating': win_rating,
-                       'matchups': win_match},
-            'loser': {'name': loser,
-                      'updated': now,
-                      'rating': lose_rating,
-                      'matchups': lose_match}}
+    return {'winner': {'id': winner,
+                       'updated': now},
+            'loser': {'id': loser,
+                      'updated': now}}
 
 
 def get_ranking_report(db, delimiter=','):
     '''
     Generates the CSV ranking report file
+
     :param db: contains the db directory/file name.
     :param delimiter: delimiter between fields
     :return: CSV file with the columns: image, rating, match-ups
@@ -188,10 +212,12 @@ def get_ranking_report(db, delimiter=','):
     csvfile = StringIO()
 
     writer = csv.writer(csvfile, delimiter=delimiter)
-    writer.writerow(['image', 'rating', 'match-ups'])
+    writer.writerow(['image', 'rating', 'matches', 'wins', 'losses'])
 
     for row in query_results:
-        writer.writerow([row['name'], row['rank'], row['matchups']])
+        writer.writerow([row['name'], row['rating'],
+                         row['num_wins'] + row['num_losses'],
+                         row['num_wins'], row['num_losses']])
 
     csvfile.seek(0)
     conn.close()
@@ -202,6 +228,7 @@ def get_ranking_report(db, delimiter=','):
 def get_detail_report(db, delimiter=','):
     '''
     Generates the CSV detail report file
+
     :param db: contains the db directory/file name.
     :param delimiter: delimiter between fields
     :return: CSV file with the columns: image, date, rating
@@ -209,15 +236,19 @@ def get_detail_report(db, delimiter=','):
     conn = sqlite3.connect(db)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    query_results = c.execute(SQL_SELECT_DETAILS_BY_NAME)
+    query_results = c.execute(SQL_SELECT_MATCHES_ALL)
 
     csvfile = StringIO()
 
     writer = csv.writer(csvfile, delimiter=delimiter)
-    writer.writerow(['image', 'date', 'rating'])
+
+    writer.writerow(['match_number', 'winner_name', 'winner_rating', 'loser_name', 'loser_rating', 'match_time'])
 
     for row in query_results:
-        writer.writerow([row['name'], row['updated'], row['rating']])
+        writer.writerow([row['match_id'],
+                         row['winner_name'], row['winner_rating_after'],
+                         row['loser_name'], row['loser_rating_after'],
+                         row['match_time']])
 
     csvfile.seek(0)
     conn.close()
@@ -236,7 +267,7 @@ def init(db, image_dir):
     print('Looking for images in: {}'.format(image_dir))
 
     if os.path.exists(db):
-        print('{} exists.  Please remove before proceeding.')
+        print('{} exists.  Please remove before proceeding.'.format(db))
         sys.exit(1)
 
     if not os.path.isdir(image_dir):
@@ -249,7 +280,7 @@ def init(db, image_dir):
 
     # Create tables
     c.execute(SQL_CREATE_TABLE_IMAGES)
-    c.execute(SQL_CREATE_TABLE_DETAILS)
+    c.execute(SQL_CREATE_TABLE_MATCHES)
 
     print('Tables created...')
 
@@ -258,7 +289,7 @@ def init(db, image_dir):
         if extension in ['png', 'jpg', 'jpeg']:
             now = time.strftime('%Y%m%d_%H%M%S%MS', time.localtime())
             fullpath = os.path.abspath(os.path.join(image_dir, file))
-            c.execute(SQL_INSERT_IMAGES, (now, file, fullpath, 1200.0, 0))
+            c.execute(SQL_INSERT_IMAGES, (file, fullpath, now, 1200.0, 0, 0))
         else:
             print('Skipping file {}, extension not supported.'.format(file))
 
@@ -273,9 +304,9 @@ def init(db, image_dir):
 
 
 def stats(db):
-    with open('rankings_report.tsv', 'w') as fd:
+    with open('detail_results.tsv', 'w') as fd:
         fd.write(get_detail_report(db, '\t').getvalue())
 
-    with open('detail_results.tsv', 'w') as fd:
+    with open('rankings_report.tsv', 'w') as fd:
         fd.write(get_ranking_report(db, '\t').getvalue())
 

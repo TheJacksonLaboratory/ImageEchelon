@@ -115,6 +115,16 @@ def image(image_name):
     return send_file(filename)
 
 
+@app.route('/defaultimage1', methods=['GET'])
+def default_image1():
+    return send_file(app.config['IMG_1_DEFAULT'])
+
+
+@app.route('/defaultimage2', methods=['GET'])
+def default_image2():
+    return send_file(app.config['IMG_2_DEFAULT'])
+
+
 def fixpaths():
     if os.path.isabs(app.config['DB']):
         app.config['DB'] = os.path.abspath(app.config['DB'])
@@ -125,10 +135,25 @@ def fixpaths():
     if os.path.isabs(app.config['IMAGE_PATH']):
         app.config['IMAGE_PATH'] = os.path.abspath(app.config['IMAGE_PATH'])
     else:
+        app.config['IMAGE_PATH'] = os.path.join(os.getcwd(), app.config['IMAGE_PATH'])
         app.config['IMAGE_PATH'] = os.path.abspath(app.config['IMAGE_PATH'])
+
+    if os.path.isabs(app.config['IMG_1_DEFAULT']):
+        app.config['IMG_1_DEFAULT'] = os.path.abspath(app.config['IMG_1_DEFAULT'])
+    else:
+        app.config['IMG_1_DEFAULT'] = os.path.join(os.getcwd(), app.config['IMG_1_DEFAULT'])
+        app.config['IMG_1_DEFAULT'] = os.path.abspath(app.config['IMG_1_DEFAULT'])
+
+    if os.path.isabs(app.config['IMG_2_DEFAULT']):
+        app.config['IMG_2_DEFAULT'] = os.path.abspath(app.config['IMG_2_DEFAULT'])
+    else:
+        app.config['IMG_2_DEFAULT'] = os.path.join(os.getcwd(), app.config['IMG_2_DEFAULT'])
+        app.config['IMG_2_DEFAULT'] = os.path.abspath(app.config['IMG_2_DEFAULT'])
 
     print('DB={}'.format(app.config['DB']))
     print('IMAGE_PATH={}'.format(app.config['IMAGE_PATH']))
+    print('IMG_1_DEFAULT={}'.format(app.config['IMG_1_DEFAULT']))
+    print('IMG_2_DEFAULT={}'.format(app.config['IMG_2_DEFAULT']))
 
 
 @cli.command('web', options_metavar='<options>',

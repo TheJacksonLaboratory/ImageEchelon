@@ -33,7 +33,7 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
                     </div>
                     <div class="panel-body">
                         <div class="row">
-                            <img class="btn btn-info btn-lg img-rounded  center-block" src="static/images/wildtype.png"  alt="Image 1" width="400" height="400" id="image1">
+                            <img class="btn btn-info btn-lg img-rounded  center-block" src="/defaultimage1"  alt="Image 1" width="400" height="400" id="image1">
                         </div>
                     </div>
                 </div>
@@ -50,7 +50,7 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
                     </div>
                     <div class="panel-body" >
                         <div class="row">
-                            <img class="btn btn-info btn-lg img-rounded  center-block" src="static/images/mutant.png"  alt="Image 2" width="400" height="400" id="image2">
+                            <img class="btn btn-info btn-lg img-rounded  center-block" src="/defaultimage2"  alt="Image 2" width="400" height="400" id="image2">
                         </div>
                     </div>
                 </div>
@@ -142,7 +142,7 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
 
     function update(winner, loser) {
         $.ajax({
-            url: "/update/winner=" + winner.name + ";loser=" + loser.name,
+            url: "/update/winner=" + winner.id + ";loser=" + loser.id,
             success: function (data) {
                 console.log("success updating");
                 console.log(data)
@@ -161,7 +161,6 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
     }
 
 $().ready(function () {
-    getPair();
     $('#start').click(function () {
         $("#start").css("visibility","hidden");
         $("#wild-def").css("visibility","hidden");

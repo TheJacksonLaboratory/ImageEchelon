@@ -101,8 +101,10 @@ FULL_DESCRIPTION='Which image below more closely resembles the wild type?  Dendr
 HEAD_TEXT='Which image is less fasciculated?'
 IMG_1_LABEL='Wild Type:'
 IMG_1_TEXT='The dendrites evenly cover the entire field. GFP can fill individual dendrites, but is usually found in discrete puncta along their lengths.'
+IMG_1_DEFAULT='example/1.png'
 IMG_2_LABEL='Mutant:'
 IMG_2_TEXT='The dendrites fasciculate, resulting in regions of dense labeling and regions of black space. GFP is less punctate in the dendrites.'
+IMG_2_DEFAULT='example/2.png'
 ```
 
 An example configuration file and image directory is located under the *example*
@@ -126,13 +128,26 @@ You can reset the scores in the database at anytime by deleting the database and
 re-running the above command. Note that this will eliminate all previous scores 
 collected.
 
-The data base columns created in image-echelon.db are include
+A simple schema of the database is 
 ```
-    updated     text    last date record updated
-    name        text    name of file
-    location    text    full path to file
-    rank        real    current rating score
-    matchups    int     number of match-ups involving this image
+IMAGES
+    image_id              INTEGER      unique image identifier
+    name                  TEXT         unique name of file
+    location              TEXT         location of file
+    updated               TEXT         date and time of last match 
+    rating                REAL         current rating
+    num_wins              INTEGER      number of times this image was picked
+    num_losses            INTEGER      number of times this image was not picked
+
+MATCHES
+    match_id              INTEGER      unique match identifier
+    winner_image_id       INTEGER      unique image identifier of winner 
+    winner_rating_before  REAL         winner's rating before match 
+    winner_rating_after   REAL         winner's rating after match
+    loser_image_id        INTEGER      unique image identifier of loser
+    loser_rating_before   REAL         loser's rating before match 
+    loser_rating_after    REAL         loser's rating after match
+    updated               TEXT         date and time of match 
 ```
 
 ### Configuring page text
@@ -148,8 +163,10 @@ FULL_DESCRIPTION    -> This is the description under the ImageEchelon header.
 HEAD_TEXT           -> This is the question text directly about the pair of images.
 IMG_1_LABEL         -> The label below the example image on the left.
 IMG_1_TEXT          -> The description below the example image on the left.
+IMG_1_DEFAULT       -> Example first image
 IMG_2_LABEL         -> The label below the example image on the right.
 IMG_2_TEXT          -> The description below the example image on the right.
+IMG_2_DEFAULT       -> Example second image
 ```
 
 ### Configuring and Launching the web-application
