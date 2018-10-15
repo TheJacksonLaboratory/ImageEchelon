@@ -33,7 +33,16 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
                     </div>
                     <div class="panel-body">
                         <div class="row">
-                            <img class="btn btn-info btn-lg img-rounded  center-block" src="/defaultimage1"  alt="Image 1" width="400" height="400" id="image1">
+                            <img class="btn btn-info btn-lg img-rounded center-block"
+                                 src="/defaultimage1"
+                                 alt="Image 1"
+                                 {% if config.IMG_1_WIDTH %}
+                                     width="{{ config.IMG_1_WIDTH }}"
+                                 {% endif %}
+                                 {% if config.IMG_1_HEIGHT %}
+                                     height="{{ config.IMG_1_HEIGHT }}"
+                                 {% endif %}
+                                 id="image1">
                         </div>
                     </div>
                 </div>
@@ -50,7 +59,16 @@ body{font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;}
                     </div>
                     <div class="panel-body" >
                         <div class="row">
-                            <img class="btn btn-info btn-lg img-rounded  center-block" src="/defaultimage2"  alt="Image 2" width="400" height="400" id="image2">
+                            <img class="btn btn-info btn-lg img-rounded center-block"
+                                 src="/defaultimage2"
+                                 alt="Image 2"
+                                 {% if config.IMG_2_WIDTH %}
+                                     width="{{ config.IMG_2_WIDTH }}"
+                                 {% endif %}
+                                 {% if config.IMG_2_HEIGHT %}
+                                     height="{{ config.IMG_2_HEIGHT }}"
+                                 {% endif %}
+                                 id="image2">
                         </div>
                     </div>
                 </div>

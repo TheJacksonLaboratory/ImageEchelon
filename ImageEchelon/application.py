@@ -183,7 +183,7 @@ def initdb():
 
 
 @cli.command('reports', options_metavar='<options>',
-             short_help='create the database')
+             short_help='generate reports')
 def reports():
     '''
     Generate reports

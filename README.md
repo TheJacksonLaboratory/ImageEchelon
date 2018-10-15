@@ -134,19 +134,14 @@ IMAGES
     image_id              INTEGER      unique image identifier
     name                  TEXT         unique name of file
     location              TEXT         location of file
-    updated               TEXT         date and time of last match 
-    rating                REAL         current rating
     num_wins              INTEGER      number of times this image was picked
     num_losses            INTEGER      number of times this image was not picked
+    updated               TEXT         date and time of last match 
 
 MATCHES
     match_id              INTEGER      unique match identifier
-    winner_image_id       INTEGER      unique image identifier of winner 
-    winner_rating_before  REAL         winner's rating before match 
-    winner_rating_after   REAL         winner's rating after match
-    loser_image_id        INTEGER      unique image identifier of loser
-    loser_rating_before   REAL         loser's rating before match 
-    loser_rating_after    REAL         loser's rating after match
+    winner_id             INTEGER      unique image identifier of winner 
+    loser_id              INTEGER      unique image identifier of loser
     updated               TEXT         date and time of match 
 ```
 
@@ -161,9 +156,13 @@ include:
 ```
 FULL_DESCRIPTION    -> This is the description under the ImageEchelon header.
 HEAD_TEXT           -> This is the question text directly about the pair of images.
+IMG_1_WIDTH         -> Size of the image width, set to 0 to use full size
+IMG_1_HEIGHT        -> Size of the image width, set to 0 to use full size
 IMG_1_LABEL         -> The label below the example image on the left.
 IMG_1_TEXT          -> The description below the example image on the left.
 IMG_1_DEFAULT       -> Example first image
+IMG_2_WIDTH         -> Size of the image width, set to 0 to use full size
+IMG_2_HEIGHT        -> Size of the image width, set to 0 to use full size
 IMG_2_LABEL         -> The label below the example image on the right.
 IMG_2_TEXT          -> The description below the example image on the right.
 IMG_2_DEFAULT       -> Example second image
