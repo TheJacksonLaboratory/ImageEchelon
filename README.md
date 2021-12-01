@@ -30,28 +30,28 @@ ImageEchelon was the software used for the ELO scoring mentioned under the Mater
 
 In order to use Image Echelon, you'll need to clone this repository to your server.  An assumption is being made that you
 are either running from a linux environment (we use CentOS) or you are running on Mac OS X. We highly recommend running Image Echelon
-from a Python virtual environment.  Image Echelon was implemented using Python 2.  Before installing any other libraries
-you should make sure you have Python 2.7.9 or better (I'm currently running Python 2.7.12).  The python package manager
-*pip* is included with this by default.  Next you'll want to install *virtualenv*.
+from a Python virtual environment.  Image Echelon was implemented using Python 2. The most recent version has been 
+upgraded to work with Python 3.  I found that the ELO library will break with Python 3.9, so I'm recommending 
+Python 3.7.11 (works both on the Mac and CentOS. One additional thing I discovered on CENTOS was for it to work with
+sqlite, I needed to install *libsqlite3x-devel* before installing python.  I used the following command:
 
 ```
-pip install virtualenv
+sudo yum install libsqlite3x-devel
 ```
 
-Once installed you'll want to create a specific virtual environment for Image Echelon, like:
+Next you'll want to install *virtualenv*.  From the project root directory I ran:
 
 ```
-virtualenv ImageEchelon
+python3.7 -m venv imageech-env
 ```
 
-This will create a new working directory named *ImageEchelon* (or whatever you chose to call the virtual environment).
-You'll then want to activate the virtual environment.
+Once installed with virtual env created I loaded it with:
 
 ```
-. ImageEchelon/bin/activate
+source imageech-env/bin/activate
 ```
 
-Once your virtualenv is activated you will now use *pip* to install the required Python libraries.  In the root directory
+Once the virtualenv is activated, using *pip* install the required Python libraries.  In the root directory
 of the project there is a *requirements.txt* file.  To install the required packages simply run:
 
 ```
@@ -62,6 +62,7 @@ pip install -r requirements.txt
 Image Echelon uses an SQLite database that you will want to set up next.  In order to setup a new database, first you need
 a directory of png files where the name of each file, prior to the ".png" represents the name of the image.  You will then
 need to update the src/config.json file which has the following content:
+
 ```
 {
   "image_path":"../data/test-data/",
@@ -69,10 +70,10 @@ need to update the src/config.json file which has the following content:
   "db_file": "image-echelon.db"
 }
 ```
-You will need to changet *image_path* to contain the location of your directory of images.Once that is set you need to generate the database using the program *setup_image_echelon_db.py*.  Usage for this program is below (not it needs to be run from the *src* directory): 
+
+You will need to changet *image_path* to contain the location of your directory of images. Once that is set you need to generate the database using the program *setup_image_echelon_db.py*.  Usage for this program is below (not it needs to be run from the *src* directory): 
 ```
-cd src
-python setup_image_echelon_db.py 
+python src/setup_image_echelon_db.py 
 ```
 
 Once your database has been created, you will also want to either create a symbolic link from *src/static/images/data* to
@@ -82,7 +83,7 @@ interface will find the images to pull for display.
 You can reset the scores in the database at anytime by re-running *setup_image_echelon_db.py*.  Note that this will
 eliminate all previous scores collected
 
-The data base columns created in image-echelon.db are include
+The database columns created in image-echelon.db are include
 ```
     updated     text    last date record updated
     name        text    name of file
