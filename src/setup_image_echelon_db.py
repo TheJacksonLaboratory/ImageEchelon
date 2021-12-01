@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
-
+from __future__ import absolute_import
+from __future__ import division
 """
 setup_image_echelon_db.py
 March 9, 2015
@@ -55,22 +56,22 @@ SOURCE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 def main():
-    with open('config.json') as json_data_file:
+    with open('src/config.json') as json_data_file:
         config = json.load(json_data_file)
     print(config)
-    image_path = '../data/images/'
-    if config.has_key('image_path'):
+    image_path = 'data/images/'
+    if 'image_path' in config:
         image_path = config['image_path']
     print(image_path)
-    db_dir = '../data/db/'
-    if config.has_key('db_dir'):
+    db_dir = 'data/db/'
+    if 'db_dir' in config:
         db_dir = config['db_dir']
     print(db_dir)
     if not os.path.isdir(db_dir):
         os.mkdir(db_dir)
 
     db_file = 'image-echelon.db'
-    if config.has_key('db_file'):
+    if 'db_file' in config:
         db_file = config['db_file']
     print(db_file)
 

@@ -1,3 +1,6 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 """
  Copyright (c) 2015 The Jackson Laboratory
 
@@ -14,18 +17,19 @@
   You should have received a copy of the GNU General Public License
   along with this software.  If not, see <http://www.gnu.org/licenses/>.
 """
+
 __author__ = 'dow'
 
 import random
 import sqlite3
 import time
-from elo import  Rating, quality_1vs1, rate_1vs1
+from elo import Rating, quality_1vs1, rate_1vs1
 
 
 def main():
     fd = open("rankings_report.tsv",'w')
     dd = open("detail_results.tsv",'w')
-    conn = sqlite3.connect('../data/db/image-echelon.db')
+    conn = sqlite3.connect('data/db/image-echelon.db')
     c = conn.cursor()
     fd.write("image\trating\tmatch-ups\n")
     for row in c.execute("select * from images order by rank desc"):

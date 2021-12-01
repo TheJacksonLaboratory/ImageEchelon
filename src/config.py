@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 DEBUG=True
 PORT=9766
 URL_BASE='http://localhost:9766'

@@ -1,4 +1,18 @@
 from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+import os
+import random
+import sqlite3
+import time
+from elo import Rating, quality_1vs1, rate_1vs1
+import io
+import csv
+import logging
+
 
 """
 ImageEchelon is the service module that contains all the logic for getting match-ups, updating rankings,
@@ -6,29 +20,20 @@ and generating ranking reports.  All database interactions are abstracted within
 
 
  Copyright (c) 2015 The Jackson Laboratory
-  
+
   This is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
- 
+
   This software is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
- 
+
   You should have received a copy of the GNU General Public License
   along with this software.  If not, see <http://www.gnu.org/licenses/>.
 """
-
-import os
-import random
-import sqlite3
-import time
-from elo import  Rating, quality_1vs1, rate_1vs1
-import cStringIO
-import csv
-
 SOURCE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -55,7 +60,7 @@ def select_matchup(config):
     random.seed()
     random.shuffle(images)
     pair = images[:2]
-
+    logging.debug(f"Fetching pair for comparison: {pair}")
     conn.close()
     return pair
 
@@ -117,7 +122,7 @@ def get_ranking_report(config):
     c = conn.cursor()
     query_results = c.execute("select * from images order by rank desc")
 
-    csvfile = cStringIO.StringIO()
+    csvfile = io.StringIO()
     headers = [
         'image',
         'rating',
@@ -137,7 +142,7 @@ def get_ranking_report(config):
     for row in rows:
         writer.writerow(
             dict(
-                (k, v.encode('utf-8') if type(v) is unicode else v) for k, v in row.iteritems()
+                tuple(row.items())
             )
         )
     csvfile.seek(0)
@@ -155,8 +160,7 @@ def get_detail_report(config):
     conn = sqlite3.connect(os.path.join(SOURCE_DIR, config.DB_DIR))
     c = conn.cursor()
     query_results = c.execute("select * from details order by name, updated")
-
-    csvfile = cStringIO.StringIO()
+    csvfile = io.StringIO()
     headers = [
         'image',
         'date',
@@ -176,12 +180,11 @@ def get_detail_report(config):
     for row in rows:
         writer.writerow(
             dict(
-                (k, v.encode('utf-8') if type(v) is unicode else v) for k, v in row.iteritems()
+                tuple(row.items())
             )
         )
     csvfile.seek(0)
     conn.close()
-
     return csvfile
 
 

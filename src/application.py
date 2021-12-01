@@ -1,4 +1,17 @@
 from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
+from builtins import object
+from io import BytesIO
+import logging
+
+from flask import Flask
+from flask import render_template
+from flask import jsonify
+from flask import make_response
+from flask import send_file
+from flask import stream_with_context
+from src import ImageEchelon
 
 """
  Copyright (c) 2015 The Jackson Laboratory
@@ -17,20 +30,15 @@ from __future__ import print_function
   along with this software.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-
-from flask import Flask
-from flask import render_template
-from flask import jsonify
-from flask import send_file
-import ImageEchelon
-
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 app = Flask(__name__)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.debug = True
 application = app
 
 
-class Config:
+class Config(object):
     pass
 
 
@@ -73,23 +81,28 @@ def load_text():
 
 @app.route("/update/winner=<winner>;loser=<loser>", methods = ['GET'])
 def update(winner, loser):
-
     json = ImageEchelon.update_ranking(CONF, winner, loser)
     return jsonify(json)
 
 
-@app.route("/report", methods=["GET"])
-@app.route("/report/", methods = ['GET'])
+@app.route("/report/", methods=["GET"], strict_slashes=False)
 def report():
     csvfile = ImageEchelon.get_ranking_report(CONF)
-    return send_file(csvfile, attachment_filename='rank_report.csv', as_attachment=True)
+    mem = BytesIO()
+    mem.write(csvfile.getvalue().encode())
+    # seeking was necessary. Python 3.5.2, Flask 0.12.2
+    mem.seek(0)
+    return send_file(mem, attachment_filename='rank_report.csv', as_attachment=True, cache_timeout=-1)
 
 
-@app.route("/detail", methods=["GET"])
-@app.route("/detail/", methods = ['GET'])
+@app.route("/detail/", methods=["GET"], strict_slashes=False)
 def detail():
     csvfile = ImageEchelon.get_detail_report(CONF)
-    return send_file(csvfile, attachment_filename='detail_report.csv', as_attachment=True)
+    mem = BytesIO()
+    mem.write(csvfile.getvalue().encode())
+    # seeking was necessary. Python 3.5.2, Flask 0.12.2
+    mem.seek(0)
+    return send_file(mem, attachment_filename='detail_report.csv', as_attachment=True, cache_timeout=-1)
 
 
 if __name__ == "__main__":
@@ -101,5 +114,5 @@ if __name__ == "__main__":
     CONF.URL_BASE = app.config["URL_BASE"]
     CONF.URL_BASE_STATIC = app.config["URL_BASE_STATIC"]
     CONF.DB_DIR = app.config["DB_DIR"]
-    app.run(host='0.0.0.0', port=9766, processes=5)
+    app.run(host='0.0.0.0', port=9766, processes=1, threaded=False)
 
