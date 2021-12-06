@@ -74,7 +74,7 @@ def load_text():
         "img_1_label": app.config['IMG_1_LABEL'],
         "img_1_text": app.config['IMG_1_TEXT'],
         "img_2_label": app.config['IMG_2_LABEL'],
-        "img_2_text": app.config['IMG_1_TEXT'],
+        "img_2_text": app.config['IMG_2_TEXT'],
     }
     return jsonify(text_fields=text_fields)
 
